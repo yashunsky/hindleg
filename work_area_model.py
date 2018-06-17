@@ -119,9 +119,7 @@ class HindLeg(object):
 
         result = structure
 
-        if np.isnan(np.min(knee)):
-            result = None
-        elif foot[1] >= hip_s[1]:
+        if np.isnan(np.min(knee)) or shin_angle < 0:
             result = None
 
         return result
