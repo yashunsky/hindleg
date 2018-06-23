@@ -25,10 +25,13 @@ def model_factory(min_shin_angle, base,
 
 if __name__ == '__main__':
 
-    ANGULAR_RESOLUTION = 5.0
-    SPATIAL_RESOLUTION = 10.0
+    MIN_SHIN_ANGLE = np.pi / 12
+
+    ANGULAR_RESOLUTION = 1.0
+    SPATIAL_RESOLUTION = 5.0
 
     BASE = 20.0
+    INITIAL_BASE_X_OFFSET = 0
     INITIAL_KNEE_ROD = 20.0
     INITIAL_KNEE_CONNECTION_ROD = 70.0
     INITIAL_KNEE_OFFSET = 20.0
@@ -40,12 +43,12 @@ if __name__ == '__main__':
     ANGLES = list(angles_generator(hip_step=ANGULAR_RESOLUTION,
                                    knee_step=ANGULAR_RESOLUTION))
 
-    model = model_factory(BASE, ANGLES, SPATIAL_RESOLUTION, mask=MASK)
+    vertical_usage = model_factory(MIN_SHIN_ANGLE, BASE,
+                                   ANGLES, SPATIAL_RESOLUTION, mask=MASK)
 
-    vertical_usage = model(INITIAL_KNEE_ROD,
-                           INITIAL_KNEE_CONNECTION_ROD,
-                           INITIAL_KNEE_OFFSET,
-                           INITIAL_HIP,
-                           INITIAL_SHIN)
+    x0 = np.array((INITIAL_BASE_X_OFFSET, INITIAL_KNEE_ROD,
+                   INITIAL_KNEE_CONNECTION_ROD,
+                   INITIAL_KNEE_OFFSET, INITIAL_HIP, INITIAL_SHIN))
 
-    print vertical_usage
+    res = minimize(vertical_usage, x0, method='Nelder-Mead')
+    print res
