@@ -27,6 +27,12 @@ def get_angle(vector):
     x, y = vector
     return np.arctan2(y, x)
 
+
+def delta(vecs):
+    v1, v2 = vecs
+    return v2 - v1
+
+
 def get_max_sequence_length(sequence):
     max_length = 0
     length = 0
@@ -160,12 +166,29 @@ class HindLeg(object):
         return (shin_angle > self.min_shin_angle and
                 shin_angle < np.pi - self.min_shin_angle)
 
+    def inverse_kinematics(self, foot):
 
+        free_shin = self.shin - self.knee_offset
 
+        hip_e = find_left_triangle(self.hip,
+                                   free_shin,
+                                   self.hip_base, foot)
 
+        knee = foot + (hip_e - foot) * self.shin / free_shin
 
+        knee_rod_e = find_left_triangle(self.knee_rod,
+                                        self.knee_connection_rod,
+                                        self.knee_base, knee)
 
+        knee_rod = (self.knee_base, knee_rod_e)
+        hip = (self.hip_base, hip_e)
+        shin = (foot, knee)
+        knee_rod_connection = (knee_rod_e, knee)
 
+        knee_angle = get_angle(delta(knee_rod)) + np.pi / 2
+        hip_angle = get_angle(delta(hip)) + np.pi
+
+        return hip_angle, knee_angle
 
     def get_cloud(self, angles, draw=False):
         points = []
@@ -214,6 +237,14 @@ if __name__ == '__main__':
     # 0.000200925892, 21.0661968, 73.515422, 19.7268278,
     # 68.0328677, 134.233191
     x1 = (0.0, 21.1, 73.5, 19.7, 68.0, 134.2)
+
+    base_x_offset, knee_rod, knee_connection_rod, knee_offset, hip, shin = x1
+    hing_leg = HindLeg(MIN_SHIN_ANGLE, base, base_x_offset,
+                       knee_rod, knee_connection_rod, knee_offset, hip, shin)
+
+    structure = hing_leg.forward_kinematics(np.radians(140), np.radians(95))
+    print structure['foot']
+    print np.degrees(hing_leg.inverse_kinematics(structure['foot']))
 
     angles = list(angles_generator(hip_step=2, knee_step=2))
 
