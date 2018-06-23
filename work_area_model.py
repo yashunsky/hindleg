@@ -171,24 +171,39 @@ class HindLeg(object):
         return get_max_cloud_cross_sections(points, resolution, draw_matrix)
 
 
+def draw_model(min_shin_angle, base, x, angles, resolution):
+    base_x_offset, knee_rod, knee_connection_rod, knee_offset, hip, shin = x
+    hing_leg = HindLeg(min_shin_angle, base, base_x_offset,
+                       knee_rod, knee_connection_rod, knee_offset, hip, shin)
+
+    hing_leg.get_max_cross_sections(angles, resolution, True, False)
+
+    structure = hing_leg.forward_kinematics(np.radians(140), np.radians(95))
+    if structure is not None:
+        draw_structure(structure['joints'].values())
+
+
 if __name__ == '__main__':
+    MIN_SHIN_ANGLE = np.pi / 12
+
     base = 20.0
-    knee_rod = 20.
+    base_x_offset = 0.0
+    knee_rod = 20.0
     knee_connection_rod = 70.0
     knee_offset = 20.0
     hip = 70.0
     shin = 150.0
 
+    x0 = base_x_offset, knee_rod, knee_connection_rod, knee_offset, hip, shin
+
+    # 0.000200925892, 21.0661968, 73.515422, 19.7268278,
+    # 68.0328677, 134.233191
+    x1 = (0.0, 21.1, 73.5, 19.7, 68.0, 134.2)
+
     angles = list(angles_generator(hip_step=2, knee_step=2))
 
-    hing_leg = HindLeg(base,
-                       knee_rod, knee_connection_rod, knee_offset, hip, shin)
-
-    hing_leg.get_max_cross_sections(angles, 10.0, True, True)
-
-    structure = hing_leg.forward_kinematics(np.radians(140), np.radians(95))
-    if structure is not None:
-        draw_structure(structure['joints'].values())
+    draw_model(MIN_SHIN_ANGLE, base, x0, angles, 5)
+    draw_model(MIN_SHIN_ANGLE, base, x1, angles, 5)
 
     plt.axis('equal')
     plt.show()
