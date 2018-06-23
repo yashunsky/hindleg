@@ -57,6 +57,11 @@ def get_max_cloud_cross_sections(points, resolution, draw=False):
     horizontal = max((get_max_sequence_length(row) for row in matrix))
     vertical = max((get_max_sequence_length(col) for col in matrix.T))
 
+    if horizontal > 0:
+        horizontal -= 1
+    if vertical > 0:
+        vertical -= 1
+
     if draw:
         corner = vec(x_min, y_min) + (resolution / 2)
 
