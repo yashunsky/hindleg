@@ -23,6 +23,10 @@ def vec(*args):
     return np.array(args)
 
 
+def get_angle(vector):
+    x, y = vector
+    return np.arctan2(y, x)
+
 def get_max_sequence_length(sequence):
     max_length = 0
     length = 0
@@ -84,6 +88,21 @@ def angles_generator(hip_min=0, hip_max=180, hip_step=5,
             yield np.radians(vec(hip_angle, knee_angle))
 
 
+def find_left_triangle(a, b, c_s, c_e, get_b_global_angle=False):
+    c_vec = (c_e - c_s) * vec(1, -1)
+
+    c = np.linalg.norm(c_vec)
+
+    d = (c ** 2 + b ** 2 - a ** 2) / (2 * c)
+
+    b_global_angle = np.pi - (get_angle(c_vec) + np.arccos(d / b))
+
+    vertex = c_e + b * vec(np.cos(b_global_angle),
+                           np.sin(b_global_angle))
+
+    return (vertex, b_global_angle) if get_b_global_angle else vertex
+
+
 class HindLeg(object):
     def __init__(self, min_shin_angle,
                  base, base_x_offset,
@@ -99,19 +118,25 @@ class HindLeg(object):
         self.hip = hip
         self.shin = shin
 
+        self.knee_base = vec(0, 0)
+        self.hip_base = self.knee_base + vec(-self.base_x_offset, -self.base)
+
     def forward_kinematics(self, hip_angle, knee_angle):
         hip_angle = hip_angle - np.pi
         knee_angle = knee_angle - np.pi / 2
 
-        knee_rod_s = vec(0, 0)
+        knee_rod_s = self.knee_base
         knee_rod_e = knee_rod_s + self.knee_rod * vec(np.cos(knee_angle),
                                                       np.sin(knee_angle))
 
-        hip_s = knee_rod_s + vec(-self.base_x_offset, -self.base)
+        hip_s = self.hip_base
         hip_e = hip_s + self.hip * vec(np.cos(hip_angle),
                                        np.sin(hip_angle))
 
-        knee, shin_angle = self.find_knee(knee_rod_e, hip_e)
+        knee, shin_angle = find_left_triangle(self.knee_connection_rod,
+                                              self.knee_offset,
+                                              knee_rod_e, hip_e,
+                                              get_b_global_angle=True)
 
         foot = knee - self.shin * vec(np.cos(shin_angle),
                                       np.sin(shin_angle))
@@ -135,22 +160,12 @@ class HindLeg(object):
         return (shin_angle > self.min_shin_angle and
                 shin_angle < np.pi - self.min_shin_angle)
 
-    def find_knee(self, knee_rod_e, hip_e):
-        x, y = (hip_e - knee_rod_e) * vec(1, -1)
 
-        l1 = self.knee_connection_rod
-        l2 = self.knee_offset
 
-        c = np.sqrt(x ** 2 + y ** 2)
 
-        d = (c ** 2 + l2 ** 2 - l1 ** 2) / (2 * c)
 
-        shin_angle = np.pi - (np.arctan2(y, x) + np.arccos(d / l2))
 
-        knee = hip_e + l2 * vec(np.cos(shin_angle),
-                                np.sin(shin_angle))
 
-        return knee, shin_angle
 
     def get_cloud(self, angles, draw=False):
         points = []
