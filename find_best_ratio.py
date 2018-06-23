@@ -17,7 +17,8 @@ def model_factory(min_shin_angle, base,
                            knee_rod, knee_connection_rod, knee_offset,
                            hip, shin)
         result = hing_leg.get_max_cross_sections(angles, resolution)[mask]
-        result /= max_length
+        result = 1 - (result / max_length)
+        print result
         return result[0] if len(result) == 1 else result
     return get_model
 
