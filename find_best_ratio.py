@@ -2,14 +2,18 @@
 # -*- coding: utf8 -*-
 
 import numpy as np
+from scipy.optimize import minimize
 
 from work_area_model import HindLeg, vec, angles_generator
 
 
-def model_factory(base, angles, resolution, mask=vec(True, True)):
-    def get_model(knee_rod, knee_connection_rod, knee_offset, hip, shin):
+def model_factory(min_shin_angle, base,
+                  angles, resolution, mask=vec(True, True)):
+    def get_model(x):
+        (base_x_offset, knee_rod,
+         knee_connection_rod, knee_offset, hip, shin) = x
         max_length = hip + shin - knee_offset
-        hing_leg = HindLeg(base,
+        hing_leg = HindLeg(min_shin_angle, base, base_x_offset,
                            knee_rod, knee_connection_rod, knee_offset,
                            hip, shin)
         result = hing_leg.get_max_cross_sections(angles, resolution)[mask]

@@ -80,12 +80,14 @@ def angles_generator(hip_min=0, hip_max=180, hip_step=5,
 
 
 class HindLeg(object):
-    def __init__(self,
-                 base,
+    def __init__(self, min_shin_angle,
+                 base, base_x_offset,
                  knee_rod, knee_connection_rod, knee_offset,
                  hip, shin):
         super(HindLeg, self).__init__()
+        self.min_shin_angle = min_shin_angle
         self.base = base
+        self.base_x_offset = base_x_offset
         self.knee_rod = knee_rod
         self.knee_connection_rod = knee_connection_rod
         self.knee_offset = knee_offset
@@ -100,7 +102,7 @@ class HindLeg(object):
         knee_rod_e = knee_rod_s + self.knee_rod * vec(np.cos(knee_angle),
                                                       np.sin(knee_angle))
 
-        hip_s = knee_rod_s + vec(0, -self.base)
+        hip_s = knee_rod_s + vec(-self.base_x_offset, -self.base)
         hip_e = hip_s + self.hip * vec(np.cos(hip_angle),
                                        np.sin(hip_angle))
 
@@ -119,10 +121,14 @@ class HindLeg(object):
 
         result = structure
 
-        if np.isnan(np.min(knee)) or shin_angle < 0:
+        if np.isnan(np.min(knee)) or not self.is_shin_angle_ok(shin_angle):
             result = None
 
         return result
+
+    def is_shin_angle_ok(self, shin_angle):
+        return (shin_angle > self.min_shin_angle and
+                shin_angle < np.pi - self.min_shin_angle)
 
     def find_knee(self, knee_rod_e, hip_e):
         x, y = (hip_e - knee_rod_e) * vec(1, -1)
