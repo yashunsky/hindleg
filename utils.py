@@ -23,7 +23,4 @@ def rotated(angle):
 
 
 def with_nan(*vectors):
-    for vector in vectors:
-        if np.isnan(np.min(vector)):
-            return True
-    return False
+    return np.isnan(vectors).any()
