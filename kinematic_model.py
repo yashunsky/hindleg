@@ -131,3 +131,10 @@ class HindLeg(object):
                             foot=foot, knee=knee,
                             hip_angle=hip_angle, knee_angle=knee_angle,
                             shin_angle=shin_angle)
+
+
+def optimal(min_shin_angle=0):
+    return HindLeg(min_shin_angle=min_shin_angle,
+                   base=20.0, base_x_offset=0.0,
+                   knee_rod=21.1, knee_connection_rod=73.5, knee_offset=19.7,
+                   hip=68.0, shin=134.2)

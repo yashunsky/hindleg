@@ -142,7 +142,7 @@ if __name__ == '__main__':
 
     angles = list(angles_generator(hip_step=2, knee_step=2))
 
-    draw_model(MIN_SHIN_ANGLE, base, x0, angles, 5)
+#    draw_model(MIN_SHIN_ANGLE, base, x0, angles, 5)
     draw_model(MIN_SHIN_ANGLE, base, x1, angles, 5)
 
     plt.axis('equal')
