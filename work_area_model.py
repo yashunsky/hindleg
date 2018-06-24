@@ -86,9 +86,9 @@ def angles_generator(hip_min=0, hip_max=180, hip_step=5,
 def get_cloud(kinematic_model, angles, draw=False):
     points = []
     for hip_angle, knee_angle in angles:
-        structure = kinematic_model.forward_kinematics(hip_angle, knee_angle)
-        if structure is not None:
-            points.append(structure['foot'])
+        state = kinematic_model.forward_kinematics(hip_angle, knee_angle)
+        if state is not None:
+            points.append(state.foot)
     cloud = np.array(points)
 
     if draw:
@@ -110,9 +110,9 @@ def draw_model(min_shin_angle, base, x, angles, resolution):
 
     get_max_cross_sections(hing_leg, angles, resolution, True, False)
 
-    structure = hing_leg.forward_kinematics(np.radians(140), np.radians(95))
-    if structure is not None:
-        draw_structure(structure['joints'].values())
+    state = hing_leg.forward_kinematics(np.radians(140), np.radians(95))
+    if state is not None:
+        draw_structure(state.get_joints().values())
 
 
 if __name__ == '__main__':
@@ -136,9 +136,9 @@ if __name__ == '__main__':
     hing_leg = HindLeg(MIN_SHIN_ANGLE, base, base_x_offset,
                        knee_rod, knee_connection_rod, knee_offset, hip, shin)
 
-    structure = hing_leg.forward_kinematics(np.radians(140), np.radians(95))
-    print structure['foot']
-    print np.degrees(hing_leg.inverse_kinematics(structure['foot']))
+    state = hing_leg.forward_kinematics(np.radians(140), np.radians(95))
+    print state.foot
+    print np.degrees(hing_leg.inverse_kinematics(state.foot).get_angles().values())
 
     angles = list(angles_generator(hip_step=2, knee_step=2))
 

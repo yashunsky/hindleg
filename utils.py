@@ -16,3 +16,14 @@ def get_angle(vector):
 def delta(vecs):
     v1, v2 = vecs
     return v2 - v1
+
+
+def rotated(angle):
+    return vec(np.cos(angle), np.sin(angle))
+
+
+def with_nan(*vectors):
+    for vector in vectors:
+        if np.isnan(np.min(vector)):
+            return True
+    return False
