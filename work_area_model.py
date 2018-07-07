@@ -8,7 +8,7 @@ from itertools import chain
 from matplotlib import pyplot as plt
 
 from utils import vec
-from kinematic_model import HindLeg
+from kinematic_model import optimal
 
 
 def draw_joint(*args):
@@ -103,14 +103,10 @@ def get_max_cross_sections(kinematic_model, angles, resolution,
     return get_max_cloud_cross_sections(points, resolution, draw_matrix)
 
 
-def draw_model(min_shin_angle, base, x, angles, resolution):
-    base_x_offset, knee_rod, knee_connection_rod, knee_offset, hip, shin = x
-    hing_leg = HindLeg(min_shin_angle, base, base_x_offset,
-                       knee_rod, knee_connection_rod, knee_offset, hip, shin)
+def draw_model(model, angles, resolution):
+    get_max_cross_sections(model, angles, resolution, True, False)
 
-    get_max_cross_sections(hing_leg, angles, resolution, True, False)
-
-    state = hing_leg.forward_kinematics(np.radians(140), np.radians(95))
+    state = model.forward_kinematics(np.radians(140), np.radians(95))
     if state is not None:
         draw_structure(state.get_joints().values())
 
@@ -126,24 +122,17 @@ if __name__ == '__main__':
     hip = 70.0
     shin = 150.0
 
-    x0 = base_x_offset, knee_rod, knee_connection_rod, knee_offset, hip, shin
+    model = optimal()
 
-    # 0.000200925892, 21.0661968, 73.515422, 19.7268278,
-    # 68.0328677, 134.233191
-    x1 = (0.0, 21.1, 73.5, 19.7, 68.0, 134.2)
+    hip_angle = 2.3326528568172553
+    knee_angle = 1.6320246065821686
 
-    base_x_offset, knee_rod, knee_connection_rod, knee_offset, hip, shin = x1
-    hing_leg = HindLeg(MIN_SHIN_ANGLE, base, base_x_offset,
-                       knee_rod, knee_connection_rod, knee_offset, hip, shin)
-
-    state = hing_leg.forward_kinematics(np.radians(140), np.radians(95))
-    print state.foot
-    print np.degrees(hing_leg.inverse_kinematics(state.foot).get_angles().values())
+    state = model.forward_kinematics(hip_angle, knee_angle)
+    model.inverse_kinematics(state.foot).get_angles().values()
 
     angles = list(angles_generator(hip_step=2, knee_step=2))
 
-#    draw_model(MIN_SHIN_ANGLE, base, x0, angles, 5)
-    draw_model(MIN_SHIN_ANGLE, base, x1, angles, 5)
+    draw_model(model, angles, 5)
 
     plt.axis('equal')
     plt.show()

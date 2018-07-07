@@ -1,25 +1,21 @@
-#!/usr/bin/env python
+#!/usr/bin python
 # -*- coding: utf8 -*-
 
 import numpy as np
 from scipy.optimize import minimize
 
-from work_area_model import HindLeg, vec, angles_generator
+from kinematic_model import HindLeg
+from vertical_motion import get_max_speeds
 
 
-def model_factory(min_shin_angle, base,
-                  angles, resolution, mask=vec(True, True)):
+def model_factory(min_shin_angle, base, resolution):
     def get_model(x):
         (base_x_offset, knee_rod,
          knee_connection_rod, knee_offset, hip, shin) = x
-        max_length = hip + shin - knee_offset
         hing_leg = HindLeg(min_shin_angle, base, base_x_offset,
                            knee_rod, knee_connection_rod, knee_offset,
                            hip, shin)
-        result = hing_leg.get_max_cross_sections(angles, resolution)[mask]
-        result = 1 - (result / max_length)
-        print result
-        return result[0] if len(result) == 1 else result
+        return -max(get_max_speeds(hing_leg, resolution)[:, 1])  # hack to find "min" value
     return get_model
 
 
@@ -38,17 +34,12 @@ if __name__ == '__main__':
     INITIAL_HIP = 70.0
     INITIAL_SHIN = 150.0
 
-    MASK = vec(False, True)
-
-    ANGLES = list(angles_generator(hip_step=ANGULAR_RESOLUTION,
-                                   knee_step=ANGULAR_RESOLUTION))
-
-    vertical_usage = model_factory(MIN_SHIN_ANGLE, BASE,
-                                   ANGLES, SPATIAL_RESOLUTION, mask=MASK)
+    vertical_speed = model_factory(MIN_SHIN_ANGLE, BASE,
+                                   SPATIAL_RESOLUTION)
 
     x0 = np.array((INITIAL_BASE_X_OFFSET, INITIAL_KNEE_ROD,
                    INITIAL_KNEE_CONNECTION_ROD,
                    INITIAL_KNEE_OFFSET, INITIAL_HIP, INITIAL_SHIN))
 
-    res = minimize(vertical_usage, x0, method='Nelder-Mead')
+    res = minimize(vertical_speed, x0, method='Nelder-Mead')
     print res

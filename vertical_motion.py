@@ -8,7 +8,7 @@ from kinematic_model import optimal
 from matplotlib import pyplot as plt
 
 # -42.48105234 -52.59465547
-X = -42.48105234
+X = -59.3
 Y_MIN = -200
 Y_MAX = -0
 STEP = 0.5
@@ -88,9 +88,33 @@ def get_max_deceleratable_speed(model, deceleration, max_angular_speed,
     return max(possible_speeds) if possible_speeds.size > 0 else 0
 
 
+def get_max_speeds(model, resolution):
+    x_max = model.hip
+    x_min = -model.hip
+    y_min = -(model.hip + model.shin - model.knee_offset)
+    y_max = 0
+
+    return np.array([[x, get_max_deceleratable_speed(model, G, MAX_W,
+                                                     x, y_min, y_max,
+                                                     resolution)]
+                     for x in np.arange(x_min, x_max, resolution)])
+
+
 if __name__ == '__main__':
-    max_speed = get_max_deceleratable_speed(optimal(), 2 * G, MAX_W,
-                                            X, Y_MIN, Y_MAX, STEP, True, 10)
+    model = optimal()
+
+    # print max(get_max_speeds(model, STEP), key=lambda x: x[1])
+    # [-59.3         1.7997635]
+
+    print model.inverse_kinematics(np.array((X, -150)))
+
+    print 'hip:', np.degrees(2.3326528568172553)
+    print 'hip:', np.degrees(2.3326528568172553)
+
+    quit()
+
+    max_speed = get_max_deceleratable_speed(model, G, MAX_W,
+                                            X, Y_MIN, Y_MAX, STEP, True, 5)
     fall_height = (max_speed ** 2) / (2 * G)
 
     print 'terminal speed:', max_speed, 'm/s'

@@ -11,6 +11,9 @@ def find_left_triangle(a, b, c_s, c_e, get_b_global_angle=False):
 
     c = np.linalg.norm(c_vec)
 
+    if c == 0:
+        c = np.nan
+
     d = (c ** 2 + b ** 2 - a ** 2) / (2 * c)
 
     b_global_angle = np.pi - (get_angle(c_vec) + np.arccos(d / b))
@@ -136,5 +139,5 @@ class HindLeg(object):
 def optimal(min_shin_angle=0):
     return HindLeg(min_shin_angle=min_shin_angle,
                    base=20.0, base_x_offset=0.0,
-                   knee_rod=21.1, knee_connection_rod=73.5, knee_offset=19.7,
-                   hip=68.0, shin=134.2)
+                   knee_rod=21.5, knee_connection_rod=79.3, knee_offset=18.0,
+                   hip=74.8, shin=152.4)
