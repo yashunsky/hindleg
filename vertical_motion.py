@@ -106,13 +106,6 @@ if __name__ == '__main__':
     # print max(get_max_speeds(model, STEP), key=lambda x: x[1])
     # [-59.3         1.7997635]
 
-    print model.inverse_kinematics(np.array((X, -150)))
-
-    print 'hip:', np.degrees(2.3326528568172553)
-    print 'hip:', np.degrees(2.3326528568172553)
-
-    quit()
-
     max_speed = get_max_deceleratable_speed(model, G, MAX_W,
                                             X, Y_MIN, Y_MAX, STEP, True, 5)
     fall_height = (max_speed ** 2) / (2 * G)
