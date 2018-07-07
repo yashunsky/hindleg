@@ -89,5 +89,9 @@ def get_max_deceleratable_speed(model, deceleration, max_angular_speed,
 
 
 if __name__ == '__main__':
-    print get_max_deceleratable_speed(optimal(), G, MAX_W,
-                                      X, Y_MIN, Y_MAX, STEP, True, 10)
+    max_speed = get_max_deceleratable_speed(optimal(), 2 * G, MAX_W,
+                                            X, Y_MIN, Y_MAX, STEP, True, 10)
+    fall_height = (max_speed ** 2) / (2 * G)
+
+    print 'terminal speed:', max_speed, 'm/s'
+    print 'fall height:', fall_height, 'm'
