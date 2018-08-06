@@ -3,28 +3,14 @@
 
 from kinematic_model import optimal
 from utils import vec
-from vertical_motion import X, STEP, G
+
+from consts import G
+from consts import EPSILON, STEP
+from consts import X, Y_MIN, Y_MAX
+from consts import M, MAX_TORQUE
 
 import numpy as np
-
 from matplotlib import pyplot as plt
-
-
-EPSILON = 0.00001
-
-# servos — 62g * 4
-# battery — 300g
-# control board — 20g
-# misc — 32g
-# sum = 600g
-
-M = 0.3  # kg per leg if land on two
-
-MAX_TORQUE = 0.064 * G  # N*m
-
-# best decceleration
-Y_MIN = -222.0  # mm
-Y_MAX = -56.0  # mm
 
 
 def get_sholders_and_torque_coeff(model, x, y):
@@ -101,7 +87,8 @@ if __name__ == '__main__':
 
     ys = np.arange(Y_MIN, Y_MAX, STEP)
 
-    torques = np.array([get_torques(model, X, y, vec(0.0, 2 * G * M)) for y in ys])
+    torques = np.array([get_torques(model, X, y, vec(0.0, 2 * G * M))
+                        for y in ys])
 
     torques[np.abs(torques) > MAX_TORQUE] = np.nan
 

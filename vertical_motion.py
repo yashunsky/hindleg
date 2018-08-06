@@ -7,16 +7,10 @@ from kinematic_model import optimal
 
 from matplotlib import pyplot as plt
 
-# -42.48105234 -52.59465547
-X = -59.3
-Y_MIN = -250
-Y_MAX = -0
-STEP = 0.5
-
-G = 9.81  # m/s^2
-
-# DSHV0507 — 6.4kg*cm  0.05s/60 degree
-MAX_W = 60 / 0.05  # degree / s
+from consts import G
+from consts import X, Y_MIN_UNBOUND as Y_MIN, Y_MAX_UNBOUND as Y_MAX
+from consts import STEP
+from consts import MAX_W
 
 
 def get_limited_y_range(model, x, y_range):
