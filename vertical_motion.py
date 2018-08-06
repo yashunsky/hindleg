@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 
 # -42.48105234 -52.59465547
 X = -59.3
-Y_MIN = -200
+Y_MIN = -250
 Y_MAX = -0
 STEP = 0.5
 
@@ -77,15 +77,28 @@ def get_max_deceleratable_speed(model, deceleration, max_angular_speed,
 
     mask = speed_matrix[-1, :] == 0
 
+    possible_curves = speed_matrix[:, mask]
+    best_curve = np.max(possible_curves, axis=1)
+    height_mask = -np.isnan(best_curve)
+
     possible_speeds = max_v_speed[mask]
+
+    possible_heights = heights[:-1][height_mask]
 
     if plot:
         plt.plot(heights[:-1], max_v_speed)
         plt.plot(heights[:-1], speed_matrix[:, ::each_nth_curve])
 
+        plt.plot(heights[:-1], best_curve, linewidth=2)
+
         plt.show()
 
-    return max(possible_speeds) if possible_speeds.size > 0 else 0
+    max_possible_speed = (max(possible_speeds)
+                          if possible_speeds.size > 0 else 0)
+    start_height = min(possible_heights)
+    stop_height = max(possible_heights)
+
+    return max_possible_speed, start_height, stop_height
 
 
 def get_max_speeds(model, resolution):
@@ -96,7 +109,7 @@ def get_max_speeds(model, resolution):
 
     return np.array([[x, get_max_deceleratable_speed(model, G, MAX_W,
                                                      x, y_min, y_max,
-                                                     resolution)]
+                                                     resolution)[0]]
                      for x in np.arange(x_min, x_max, resolution)])
 
 
@@ -106,9 +119,12 @@ if __name__ == '__main__':
     # print max(get_max_speeds(model, STEP), key=lambda x: x[1])
     # [-59.3         1.7997635]
 
-    max_speed = get_max_deceleratable_speed(model, G, MAX_W,
-                                            X, Y_MIN, Y_MAX, STEP, True, 5)
-    fall_height = (max_speed ** 2) / (2 * G)
+    speed, h_min, h_max = get_max_deceleratable_speed(model, G, MAX_W,
+                                                      X, Y_MIN, Y_MAX, STEP,
+                                                      True, 5)
+    fall_height = (speed ** 2) / (2 * G)
 
-    print 'terminal speed:', max_speed, 'm/s'
+    print 'terminal speed:', speed, 'm/s'
     print 'fall height:', fall_height, 'm'
+    print 'start height:', h_min * 1000 + Y_MIN, 'mm'
+    print 'stop height:', h_max * 1000 + Y_MIN, 'mm'
