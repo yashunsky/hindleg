@@ -6,6 +6,8 @@ G = 9.81  # m/s^2
 
 # drive DSHV0507nТ — 6.4kg*cm  0.05s/60 degree
 MAX_W = 60 / 0.05  # degree / s
+MAX_E = 2 * (60 / 2) / (0.05 ** 2)  # degree / s^2  Just a guess
+
 MAX_TORQUE = 0.064 * G  # N*m
 
 # entire future robot
