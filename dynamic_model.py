@@ -13,8 +13,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
-def get_sholders_and_torque_coeff(model, x, y):
-    state = model.inverse_kinematics(vec(x, y))
+def get_sholders_and_torque_coeff(model, point):
+    state = model.inverse_kinematics(point)
     if state is None:
         return None
 
@@ -36,33 +36,33 @@ def get_sholders_and_torque_coeff(model, x, y):
     hip_sholder = (state.foot - state.hip_s) / 1000  # mm -> m
     knee_sholder = (state.foot - state.hip_e) / 1000  # mm -> m
 
-    return hip_sholder, knee_sholder, torque_coeff
+    return state, hip_sholder, knee_sholder, torque_coeff
 
 
-def get_force(model, x, y, hip_drive_torque, knee_drive_torque):
+def get_force(model, point, hip_drive_torque, knee_drive_torque):
 
-    params = get_sholders_and_torque_coeff(model, x, y)
+    params = get_sholders_and_torque_coeff(model, point)
 
     if params is None:
-        return np.nan
+        return None, np.nan
 
-    hip_sholder, knee_sholder, torque_coeff = params
+    state, hip_sholder, knee_sholder, torque_coeff = params
 
     hip_torque = hip_drive_torque
     knee_torque = knee_drive_torque * torque_coeff
 
     # F = M / d
 
-    return hip_torque / hip_sholder + knee_torque / knee_sholder
+    return state, hip_torque / hip_sholder + knee_torque / knee_sholder
 
 
-def get_torques(model, x, y, shin_force):
-    params = get_sholders_and_torque_coeff(model, x, y)
+def get_torques(model, point, shin_force):
+    params = get_sholders_and_torque_coeff(model, point)
 
     if params is None:
-        return np.nan, np.nan
+        return None, np.nan, np.nan
 
-    hip_sholder, knee_sholder, torque_coeff = params
+    state, hip_sholder, knee_sholder, torque_coeff = params
 
     # shin_force = hip_torque / hip_sholder + knee_torque / knee_sholder
     #
@@ -80,14 +80,14 @@ def get_torques(model, x, y, shin_force):
 
     hip_drive_torque, knee_drive_torque = (np.matrix(A).I * np.matrix(B).T).A1
 
-    return hip_drive_torque, knee_drive_torque
+    return state, hip_drive_torque, knee_drive_torque
 
 if __name__ == '__main__':
     model = optimal()
 
     ys = np.arange(Y_MIN, Y_MAX, STEP)
 
-    torques = np.array([get_torques(model, X, y, vec(0.0, 2 * G * M))
+    torques = np.array([get_torques(model, vec(X, y), vec(0.0, 2 * G * M))[1:]
                         for y in ys])
 
     torques[np.abs(torques) > MAX_TORQUE] = np.nan
